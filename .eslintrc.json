@@ -27,10 +27,6 @@
             "error",
             "always"
         ],
-        "space-in-parens" : [
-            "error",
-            "always"
-        ],
         "consistent-return" : "error",
         "space-before-function-paren" : "error",
         "key-spacing" : "error",

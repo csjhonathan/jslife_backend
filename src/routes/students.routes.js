@@ -10,5 +10,6 @@ const studentsRoutes = Router();
 
 studentsRoutes.post( '/students/register', schemaValidator( studentSchemaRegister ), studentExist(), students.create );
 studentsRoutes.patch( '/students/update', schemaValidator( studentSchemaUpdate ), studentExist(), students.update );
+studentsRoutes.get( '/students/list', students.list );
 
 export default studentsRoutes;

@@ -24,6 +24,16 @@ class StudentsControllers
 			return res.status( 500 ).send( {message: error.message} );
 		}
 	}
+
+	async list ( req, res ){
+		const {classId} = req.query;
+		try {
+			const {rows: studentsList} = await students.getStudents ( {classId} );
+			return res.status( 200 ).send( studentsList );
+		} catch ( error ) {
+			return res.status( 500 ).send( {message: error.message} );
+		}
+	}
 }
 
 export default StudentsControllers;

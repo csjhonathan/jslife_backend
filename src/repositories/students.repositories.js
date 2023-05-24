@@ -32,26 +32,31 @@ class StudentsRepositories
 		return db.query( query );
 	}
 	
-	getStudentsClass ( {classId} ){
+	getStudentById ( {studentId} ){
+		const query = {
+			text: 'SELECT * FROM students WHERE id = $1',
+			values: [studentId]
+		};
+
+		return db.query( query );
+	}
+
+	getStudents ( {classId} ){
 		const query = {
 			text: `
 				SELECT s.id, s.name, s.email, s.cpf, s.photo, c.name AS class, r.name AS role
 					FROM students s
 					LEFT JOIN class c ON c.id = s.class_id
 					LEFT JOIN roles r ON r.id = s.role_id
-					WHERE s.class_id = $1;
+					WHERE 1=1
 			`,
-			values: [classId]
+			values: []
 		};
 
-		return db.query( query );
-	}
-
-	getStudentById ( {studentId} ){
-		const query = {
-			text: 'SELECT * FROM students WHERE id = $1',
-			values: [studentId]
-		};
+		if( classId ){
+			query.values.push( classId );
+			query.text+= ` AND s.class_id = $${query.values.length}`;
+		}
 
 		return db.query( query );
 	}
@@ -83,7 +88,6 @@ class StudentsRepositories
 			values
 		};
 
-		console.log( query );
 		return db.query( query );
 	}
 }
