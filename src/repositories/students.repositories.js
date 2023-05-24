@@ -6,7 +6,7 @@ class StudentsRepositories
 		const query = {
 			text: `
         INSERT INTO students (name, email, cpf, class_id, photo)
-        VALUES ($1, $2, $3, $4, $5)
+        	VALUES ($1, $2, $3, $4, $5)
       `,
 			values: [name, email, cpf, classId, photo]
 		};
@@ -32,6 +32,60 @@ class StudentsRepositories
 		return db.query( query );
 	}
 	
+	getStudentsClass ( {classId} ){
+		const query = {
+			text: `
+				SELECT s.id, s.name, s.email, s.cpf, s.photo, c.name AS class, r.name AS role
+					FROM students s
+					LEFT JOIN class c ON c.id = s.class_id
+					LEFT JOIN roles r ON r.id = s.role_id
+					WHERE s.class_id = $1;
+			`,
+			values: [classId]
+		};
+
+		return db.query( query );
+	}
+
+	getStudentById ( {studentId} ){
+		const query = {
+			text: 'SELECT * FROM students WHERE id = $1',
+			values: [studentId]
+		};
+
+		return db.query( query );
+	}
+
+	update ( user, student_id ){
+
+		let SET = 'SET';
+		let WHERE = 'WHERE students.id = ';
+
+		const values = [];
+
+		for( const props in user ){
+
+			if( !user[props] ) continue;
+			values.push( user[props] );
+			SET += `, ${props} = ${'$' + values.length}`;
+			
+		}
+
+		values.push( student_id );
+		
+		WHERE += `${'$' + values.length};`;
+		const query = {
+			text: `
+			UPDATE students
+				${SET.replace( ',','' )}
+        ${WHERE}
+			`,
+			values
+		};
+
+		console.log( query );
+		return db.query( query );
+	}
 }
 
 export default StudentsRepositories;
