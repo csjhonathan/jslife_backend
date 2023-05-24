@@ -1,0 +1,39 @@
+{
+    "env": {
+        "es2021": true,
+        "node": true
+    },
+    "extends": "eslint:recommended",
+    "overrides": [
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "rules": {
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "space-in-parens" : [
+            "error",
+            "always"
+        ],
+        "consistent-return" : "error",
+        "space-before-function-paren" : "error",
+        "key-spacing" : "error",
+        "object-curly-spacing" : "error"
+    }
+}
