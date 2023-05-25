@@ -7,6 +7,7 @@ class StudentsRepositories
 			text: `
         INSERT INTO students (name, email, cpf, class_id, photo)
         	VALUES ($1, $2, $3, $4, $5)
+					RETURNING id AS student_id
       `,
 			values: [name, email, cpf, classId, photo]
 		};
@@ -78,16 +79,19 @@ class StudentsRepositories
 
 		values.push( student_id );
 		
-		WHERE += `${'$' + values.length};`;
+		WHERE += `${'$' + values.length}`;
 		const query = {
 			text: `
 			UPDATE students
 				${SET.replace( ',','' )}
         ${WHERE}
+			  RETURNING *
 			`,
 			values
 		};
 
+		query.text+=';';
+		console.log(query);
 		return db.query( query );
 	}
 }

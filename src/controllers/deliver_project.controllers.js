@@ -15,6 +15,18 @@ class DeliverProjectControllers
 			return res.status( 500 ).send( {message: error.message} );
 		}
 	}
+
+	async list (req, res){
+		const {classId: class_id, projectId: project_id} = req.query;
+		console.log({class_id, project_id});
+		try {
+			const {rows: projects} = await deliver.list({class_id, project_id});
+			return res.status(200).send(projects);
+		} catch (error) {
+			return res.status( 500 ).send( {message: error.message} );
+		}
+	}
+
 }
 
 

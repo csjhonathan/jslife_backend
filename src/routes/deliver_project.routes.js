@@ -7,5 +7,6 @@ const deliver = new DeliverProjectControllers;
 const deliverRoutes = Router();
 
 deliverRoutes.post('/projects/deliver', schemaValidator(deliverProject), deliver.create);
+deliverRoutes.get('/projects/deliver/list', deliver.list);
 
 export default deliverRoutes;

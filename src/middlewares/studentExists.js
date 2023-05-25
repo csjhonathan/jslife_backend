@@ -13,12 +13,19 @@ export default function studentExist (){
 			const {rows: [studentByCpf]} = await student.getStudentByCpf( {cpf} );
 			const {rows: [studentByEmail]} = await student.getStudentByEmail( {email} );
 			const {rows: [studentById]} = await student.getStudentById( {studentId} );
+
 			if( path === '/students/register' && ( studentByCpf || studentByEmail ) ){
 				return res.status( 409 ).send( {message: 'Este aluno ja está cadastrado'} );
 			}
-
+			const previous = {};
 			if( path === '/students/update' && !studentById ){
 				return res.status( 409 ).send( {message: 'Aluno não encontrado!'} );
+			}else if(path === '/students/update' && studentById){
+				for( const props in studentById ){
+					if(!studentById[props]) continue;
+					previous[props] = studentById[props];
+				}
+				res.locals.previous = previous;
 			}
 			
 			return next();
