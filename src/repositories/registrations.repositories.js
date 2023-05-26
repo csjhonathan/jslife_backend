@@ -40,8 +40,6 @@ class RegistrationsRepositories
 			`,
 			values
 		};
-		console.log(data);
-		console.log(query);
 		return db.query( query );
 	}
 

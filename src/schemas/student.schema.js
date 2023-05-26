@@ -57,10 +57,5 @@ export const studentSchemaUpdate = Joi.object( {
 		.number()
 		.greater( 0 )
 		.message( 'O campo classId é obrigatório e deve ser maior que 0' )
-		.optional(),
-	studentId: Joi
-		.number()
-		.greater( 0 )
-		.message( 'O campo studentId é obrigatório e deve ser maior que 0' )
-		.required()
+		.optional()
 } );

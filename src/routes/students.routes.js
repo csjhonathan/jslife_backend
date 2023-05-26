@@ -9,7 +9,8 @@ const students = new StudentsControllers;
 const studentsRoutes = Router();
 
 studentsRoutes.post( '/students/register', schemaValidator( studentSchemaRegister ), studentExist(), students.create );
-studentsRoutes.patch( '/students/update', schemaValidator( studentSchemaUpdate ), studentExist(), students.update );
+studentsRoutes.patch( '/students/update/:studentId', schemaValidator( studentSchemaUpdate ), studentExist(), students.update );
 studentsRoutes.get( '/students/list', students.list );
+studentsRoutes.get( '/students/list/:studentId', students.getStudentById );
 
 export default studentsRoutes;

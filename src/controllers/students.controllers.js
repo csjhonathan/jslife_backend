@@ -16,14 +16,16 @@ class StudentsControllers
 		}
 	}
 
-	async update ( _req, res ){
+	async update ( req, res ){
 
-		const {name, email, cpf, photo, classId: class_id, roleId: role_id, studentId: student_id, previous} = res.locals;
+		const {name, email, cpf, photo, classId: class_id, roleId: role_id, previous} = res.locals;
+		const {studentId: student_id} = req.params;
+		
 		if( !student_id ) return res.status( 401 ).send( 'Informe um id para a alteração!' );
 		try {
 			await students.update( {name, email, cpf, photo, class_id, role_id}, student_id );
-
-			if(class_id && previous.class_id !== class_id){
+			const {rows: [registrationExists]} = await registration.list({student_id});
+			if((class_id && previous.classId !== class_id) || !registrationExists){
 				await registration.create({student_id, class_id});
 			}
 
@@ -39,6 +41,18 @@ class StudentsControllers
 			const {rows: studentsList} = await students.getStudents ( {classId} );
 			return res.status( 200 ).send( studentsList );
 		} catch ( error ) {
+			return res.status( 500 ).send( {message: error.message} );
+		}
+	}
+
+	async getStudentById (req, res){
+		const {studentId} = req.params;
+
+		try {
+			const {rows: [student]} = await students.getStudentById({studentId});
+			if(!student) res.status(404).send({message: 'Este aluno não existe!'});
+			return res.status(200).send(student);
+		} catch (error) {
 			return res.status( 500 ).send( {message: error.message} );
 		}
 	}

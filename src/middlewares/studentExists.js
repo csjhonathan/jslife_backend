@@ -5,8 +5,9 @@ const student = new StudentsRepositories;
 export default function studentExist (){
 	return async ( req, res, next ) => {
     
-		const {email, cpf, studentId} = res.locals;
+		const {email, cpf} = res.locals;
 		const {path} = req;
+		const {studentId} = req.params;
 
 		try {
 
@@ -18,13 +19,22 @@ export default function studentExist (){
 				return res.status( 409 ).send( {message: 'Este aluno ja está cadastrado'} );
 			}
 			const previous = {};
-			if( path === '/students/update' && !studentById ){
+			if( path.includes('/students/update') && !studentById ){
 				return res.status( 409 ).send( {message: 'Aluno não encontrado!'} );
-			}else if(path === '/students/update' && studentById){
+			}else if(path.includes('/students/update') && studentById){
+				const hash = {
+					name: true,
+					cpf: true,
+					email: true,
+					classId: true,
+					photo: true
+				};
+
 				for( const props in studentById ){
-					if(!studentById[props]) continue;
+					if(!studentById[props] || !hash[props]) continue;
 					previous[props] = studentById[props];
 				}
+				
 				res.locals.previous = previous;
 			}
 			

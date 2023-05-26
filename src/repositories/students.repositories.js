@@ -35,7 +35,20 @@ class StudentsRepositories
 	
 	getStudentById ( {studentId} ){
 		const query = {
-			text: 'SELECT * FROM students WHERE id = $1',
+			text: `
+			SELECT s.id, s.name, s.cpf, s.email, s.photo, c.name AS class, c.id AS "classId",
+			CASE
+					WHEN COUNT(r.id) = 0 THEN NULL
+					ELSE COALESCE(json_agg(json_build_object('id', r.id, 'class', cl.name, 'entry_date', r.entry_date, 'egress_date', r.egress_date)ORDER BY r.egress_date DESC), '[]')
+			END AS registrations,
+			MAX(CASE WHEN r.egress_date IS NULL THEN r.id END) AS "currentRegistration"
+			FROM students s
+			JOIN class c ON c.id = s.class_id
+			LEFT JOIN registration r ON r.student_id = s.id
+			LEFT JOIN class cl ON cl.id = r.class_id
+			WHERE s.id = $1
+			GROUP BY s.id, s.name, s.cpf, s.email, s.photo, c.name, c.id;
+			`,
 			values: [studentId]
 		};
 
@@ -45,7 +58,7 @@ class StudentsRepositories
 	getStudents ( {classId} ){
 		const query = {
 			text: `
-				SELECT s.id, s.name, s.email, s.cpf, s.photo, c.name AS class, r.name AS role
+				SELECT s.id, s.name, s.email, s.cpf, s.photo, c.name AS class, c.id AS classId , r.name AS role
 					FROM students s
 					LEFT JOIN class c ON c.id = s.class_id
 					LEFT JOIN roles r ON r.id = s.role_id
@@ -91,7 +104,6 @@ class StudentsRepositories
 		};
 
 		query.text+=';';
-		console.log(query);
 		return db.query( query );
 	}
 }

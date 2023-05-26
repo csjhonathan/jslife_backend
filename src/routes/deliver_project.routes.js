@@ -8,5 +8,6 @@ const deliverRoutes = Router();
 
 deliverRoutes.post('/projects/deliver', schemaValidator(deliverProject), deliver.create);
 deliverRoutes.get('/projects/deliver/list', deliver.list);
+deliverRoutes.patch('/projects/deliver/update/:deliverId', deliver.update);
 
 export default deliverRoutes;

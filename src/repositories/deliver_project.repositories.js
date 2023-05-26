@@ -46,6 +46,15 @@ class DeliverProjectRepositories
 		return db.query(query);
 	}
 
+	update ({gradeId, deliverId}){
+		const query = {
+			text: 'UPDATE project_deliver SET grade_id = $1 WHERE id = $2',
+			values: [gradeId, deliverId]
+		};
+
+		console.log(query);
+		return db.query(query);
+	}
 }
 
 export default DeliverProjectRepositories;
