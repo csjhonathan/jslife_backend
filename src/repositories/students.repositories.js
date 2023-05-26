@@ -58,11 +58,14 @@ class StudentsRepositories
 	getStudents ( {classId} ){
 		const query = {
 			text: `
-				SELECT s.id, s.name, s.email, s.cpf, s.photo, c.name AS class, c.id AS classId , r.name AS role
-					FROM students s
-					LEFT JOIN class c ON c.id = s.class_id
-					LEFT JOIN roles r ON r.id = s.role_id
-					WHERE 1=1
+			SELECT 
+			s.id, s.name, s.email, s.cpf, s.photo, c.name AS class, c.id AS classId , r.name AS role,
+			CASE WHEN COUNT(reg.student_id) > 0 THEN TRUE ELSE FALSE END AS registered
+			FROM students s
+			LEFT JOIN class c ON c.id = s.class_id
+			LEFT JOIN roles r ON r.id = s.role_id
+			LEFT JOIN registration reg ON reg.student_id = s.id
+			WHERE 1=1
 			`,
 			values: []
 		};
@@ -71,6 +74,7 @@ class StudentsRepositories
 			query.values.push( classId );
 			query.text+= ` AND s.class_id = $${query.values.length}`;
 		}
+		query.text+=' GROUP BY s.id, s.name, s.email, s.cpf, s.photo, c.name, c.id, r.name';
 		query.text+=' ORDER BY s.name';
 		
 		return db.query( query );
