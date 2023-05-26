@@ -71,7 +71,8 @@ class StudentsRepositories
 			query.values.push( classId );
 			query.text+= ` AND s.class_id = $${query.values.length}`;
 		}
-
+		query.text+=' ORDER BY s.name';
+		
 		return db.query( query );
 	}
 

@@ -40,7 +40,7 @@ class DeliverProjectRepositories
 			query.text+=` AND p.id = $${query.values.length}`;
 		}
 		query.text+=`
-			ORDER BY deliver_id
+			ORDER BY student_name
 			ASC;
 		`;
 		return db.query(query);
@@ -52,7 +52,6 @@ class DeliverProjectRepositories
 			values: [gradeId, deliverId]
 		};
 
-		console.log(query);
 		return db.query(query);
 	}
 }
