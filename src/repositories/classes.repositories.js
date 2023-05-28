@@ -5,7 +5,7 @@ class ClassesRepositores
 	create ({className}){
 		const query = {
 			text: `
-        INSERT INTO class (name)
+        INSERT INTO classes (name)
         VALUES ($1)
       `,
 			values: [className]
@@ -17,7 +17,10 @@ class ClassesRepositores
 	list (){
 		const query = {
 			text: `
-        SELECT * FROM class`,
+        SELECT * FROM classes
+				ORDER BY classes.id
+				ASC
+				`,
 			values: []
 		};
 
@@ -27,13 +30,13 @@ class ClassesRepositores
 	update ( data, classId){
 
 		let SET = 'SET';
-		let WHERE = 'WHERE class.id = ';
+		let WHERE = 'WHERE classes.id = ';
 
 		const values = [];
 
 		for( const props in data ){
 
-			if( !data[props] ) continue;
+			if( !data[props] && props !== 'entry') continue;
 			values.push( data[props] );
 			SET += `, ${props} = ${'$' + values.length}`;
 			
@@ -44,7 +47,7 @@ class ClassesRepositores
 		WHERE += `${'$' + values.length}`;
 		const query = {
 			text: `
-			UPDATE class
+			UPDATE classes
 				${SET.replace( ',','' )}
         ${WHERE}
 			  RETURNING *

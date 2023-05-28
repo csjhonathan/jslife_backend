@@ -5,7 +5,7 @@ class DeliverProjectRepositories
 	create ({project_id, class_id, student_id, repository}){
 		const query = {
 			text: `
-        INSERT INTO project_deliver (project_id, class_id, student_id, repository)
+        INSERT INTO delivered_projects (project_id, class_id, student_id, repository)
         VALUES ($1,$2,$3,$4)
         RETURNING *
       ;
@@ -19,11 +19,11 @@ class DeliverProjectRepositories
 	list ({class_id, project_id}){
 		const query = {
 			text: `
-			SELECT pd.id AS deliver_id, s.name AS student_name, p.name AS project_name , pd.repository, c.name AS class_name , pd.deliver_date, g.name AS grade
-			FROM project_deliver pd
-			LEFT JOIN students s ON s.id = pd.student_id
+			SELECT pd.id AS deliver_id, u.name AS student_name, p.name AS project_name , pd.repository, c.name AS class_name , pd.delivery_date, g.name AS grade
+			FROM delivered_projects pd
+			LEFT JOIN users u ON u.id = pd.student_id
 			LEFT JOIN projects p ON p.id = pd.project_id
-			LEFT JOIN class c ON c.id = pd.class_id
+			LEFT JOIN classes c ON c.id = pd.class_id
 			LEFT JOIN grades g ON g.id = pd.grade_id
 			WHERE 1=1
       `,
@@ -48,7 +48,7 @@ class DeliverProjectRepositories
 
 	update ({gradeId, deliverId}){
 		const query = {
-			text: 'UPDATE project_deliver SET grade_id = $1 WHERE id = $2',
+			text: 'UPDATE delivered_projects SET grade_id = $1 WHERE id = $2',
 			values: [gradeId, deliverId]
 		};
 

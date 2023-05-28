@@ -1,15 +1,12 @@
 import StudentsRepositories from '../repositories/students.repositories.js';
-import RegistrationsRepositories from '../repositories/registrations.repositories.js';
 
-const registration = new RegistrationsRepositories;
 const students = new StudentsRepositories;
 class StudentsControllers
 {
 	async create ( _req, res ){
 		const {name, email, cpf, photo, classId} = res.locals;
 		try {
-			const {rows: [student]} = await students.create( {name, email, cpf, photo, classId} );
-			await registration.create({student_id: student.student_id, class_id: classId});
+			await students.create( {name, email, cpf, photo, classId} );
 			return res.status( 201 ).send( {message: 'aluno cadastrado'} );
 		} catch ( error ) {
 			return res.status( 500 ).send( {message: error.message} );
@@ -18,18 +15,15 @@ class StudentsControllers
 
 	async update ( req, res ){
 
-		const {name, email, cpf, photo, classId: class_id, roleId: role_id, previous} = res.locals;
+		const {name, email, cpf, photo} = res.locals;
 		const {studentId: student_id} = req.params;
 		
 		if( !student_id ) return res.status( 401 ).send( 'Informe um id para a alteração!' );
 		try {
-			await students.update( {name, email, cpf, photo, class_id, role_id}, student_id );
-			const {rows: [registrationExists]} = await registration.list({student_id});
-			if((class_id && previous.classId !== class_id) || !registrationExists){
-				await registration.create({student_id, class_id});
-			}
-
+			
+			await students.update( {name, email, cpf, photo}, student_id );
 			return res.status( 201 ).send( {message: 'Atualização bem sucedida!'} );
+			
 		} catch ( error ) {
 			return res.status( 500 ).send( {message: error.message} );
 		}

@@ -5,9 +5,9 @@ class StudentsRepositories
 	create ( {name, email, cpf, classId, photo} ){
 		const query = {
 			text: `
-        INSERT INTO students (name, email, cpf, class_id, photo)
-        	VALUES ($1, $2, $3, $4, $5)
-					RETURNING id AS student_id
+        INSERT INTO users (name, email, cpf, registration_class_id, photo)
+				VALUES ($1, $2, $3, $4, $5)
+				RETURNING id AS student_id
       `,
 			values: [name, email, cpf, classId, photo]
 		};
@@ -17,7 +17,7 @@ class StudentsRepositories
 
 	getStudentByCpf ( {cpf} ){
 		const query = {
-			text: 'SELECT * FROM students WHERE cpf = $1',
+			text: 'SELECT * FROM users WHERE cpf = $1 AND role_id = 1',
 			values: [cpf]
 		};
 		
@@ -26,7 +26,7 @@ class StudentsRepositories
 
 	getStudentByEmail ( {email} ){
 		const query = {
-			text: 'SELECT * FROM students WHERE email = $1',
+			text: 'SELECT * FROM users WHERE email = $1 AND role_id = 1',
 			values: [email]
 		};
 
@@ -36,18 +36,44 @@ class StudentsRepositories
 	getStudentById ( {studentId} ){
 		const query = {
 			text: `
-			SELECT s.id, s.name, s.cpf, s.email, s.photo, c.name AS class, c.id AS "classId",
+			SELECT 
+			u.id, 
+			u.name, 
+			u.cpf, 
+			u.email, 
+			u.photo, 
+			u.registered AS "isRegistered",
+			c.id AS "registrationClassId",
+			c.name AS "registrationClass", 
+			(
+				SELECT json_build_object('id', r.id, 'class', cl.name, 'entry_date', r.entry_date, 'egress_date', r.egress_date)
+				FROM registrations r
+				JOIN classes cl ON cl.id = r.class_id
+				WHERE r.id = u.current_registration_id
+			) AS "currentRegistration",
 			CASE
-					WHEN COUNT(r.id) = 0 THEN NULL
-					ELSE COALESCE(json_agg(json_build_object('id', r.id, 'class', cl.name, 'entry_date', r.entry_date, 'egress_date', r.egress_date)ORDER BY r.egress_date DESC), '[]')
-			END AS registrations,
-			MAX(CASE WHEN r.egress_date IS NULL THEN r.id END) AS "currentRegistration"
-			FROM students s
-			JOIN class c ON c.id = s.class_id
-			LEFT JOIN registration r ON r.student_id = s.id
-			LEFT JOIN class cl ON cl.id = r.class_id
-			WHERE s.id = $1
-			GROUP BY s.id, s.name, s.cpf, s.email, s.photo, c.name, c.id;
+				WHEN COUNT(r.student_id) = 0 THEN NULL
+				ELSE json_agg(json_build_object('id', r.id, 'class', cl.name, 'entry_date', r.entry_date, 'egress_date', r.egress_date) ORDER BY r.id DESC)
+			END AS registrations
+		FROM 
+			users u
+		JOIN 
+			classes c ON c.id = u.registration_class_id
+		LEFT JOIN 
+			registrations r ON r.student_id = u.id
+		LEFT JOIN 
+			classes cl ON cl.id = r.class_id
+		WHERE 
+			u.id = $1 AND role_id = 1
+		GROUP BY 
+			u.id, 
+			u.name, 
+			u.cpf, 
+			u.email, 
+			u.photo, 
+			u.registered,
+			c.name, 
+			c.id;
 			`,
 			values: [studentId]
 		};
@@ -58,24 +84,26 @@ class StudentsRepositories
 	getStudents ( {classId} ){
 		const query = {
 			text: `
-			SELECT 
-			s.id, s.name, s.email, s.cpf, s.photo, c.name AS class, c.id AS classId , r.name AS role,
-			CASE WHEN COUNT(reg.student_id) > 0 THEN TRUE ELSE FALSE END AS registered
-			FROM students s
-			LEFT JOIN class c ON c.id = s.class_id
-			LEFT JOIN roles r ON r.id = s.role_id
-			LEFT JOIN registration reg ON reg.student_id = s.id
-			WHERE 1=1
+			SELECT
+			u.id, u.name, u.photo, u.cpf, u.registration_class_id,u.current_registration_id, u.registered AS "isRegistered", c.id AS class_id, c.name AS class_name
+			FROM
+					users u
+			LEFT JOIN
+					registrations r ON u.current_registration_id = r.id
+			LEFT JOIN
+					classes c ON r.class_id = c.id
+			WHERE
+					1=1
 			`,
 			values: []
 		};
 
 		if( classId ){
 			query.values.push( classId );
-			query.text+= ` AND s.class_id = $${query.values.length}`;
+			query.text+= ` AND c.id = $${query.values.length}`;
 		}
-		query.text+=' GROUP BY s.id, s.name, s.email, s.cpf, s.photo, c.name, c.id, r.name';
-		query.text+=' ORDER BY s.name';
+		query.text+=' GROUP BY u.id, u.name, u.photo, u.cpf, u.registered, c.id, c.name';
+		query.text+=' ORDER BY u.name';
 		
 		return db.query( query );
 	}
@@ -83,7 +111,7 @@ class StudentsRepositories
 	update ( user, student_id ){
 
 		let SET = 'SET';
-		let WHERE = 'WHERE students.id = ';
+		let WHERE = 'WHERE id = ';
 
 		const values = [];
 
@@ -100,7 +128,7 @@ class StudentsRepositories
 		WHERE += `${'$' + values.length}`;
 		const query = {
 			text: `
-			UPDATE students
+			UPDATE users
 				${SET.replace( ',','' )}
         ${WHERE}
 			  RETURNING *
@@ -109,6 +137,7 @@ class StudentsRepositories
 		};
 
 		query.text+=';';
+
 		return db.query( query );
 	}
 }

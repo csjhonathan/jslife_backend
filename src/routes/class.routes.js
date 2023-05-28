@@ -8,7 +8,7 @@ const classRoutes = Router();
 
 classRoutes.post('/classes/create', schemaValidator(createClassSchema), classes.create);
 classRoutes.get('/classes/list', classes.list);
-classRoutes.patch('/classes/update', schemaValidator(updateClassSchema), classes.update);
+classRoutes.patch('/classes/update/:classId', schemaValidator(updateClassSchema), classes.update);
 
 
 export default classRoutes;

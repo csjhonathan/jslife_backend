@@ -18,6 +18,7 @@ export default function studentExist (){
 			if( path === '/students/register' && ( studentByCpf || studentByEmail ) ){
 				return res.status( 409 ).send( {message: 'Este aluno ja está cadastrado'} );
 			}
+
 			const previous = {};
 			if( path.includes('/students/update') && !studentById ){
 				return res.status( 409 ).send( {message: 'Aluno não encontrado!'} );
@@ -38,6 +39,24 @@ export default function studentExist (){
 				res.locals.previous = previous;
 			}
 			
+			if(path.includes('/registrations/create/') && studentById && studentById.registered){
+				return res.status(404).send({message: 'Este aluno já está matriculado!'});
+			}else if(path.includes('/registrations/create/') && studentById && !studentById.registered){
+				const hash = {
+					name: true,
+					cpf: true,
+					email: true,
+					registrationClassId: true,
+					photo: true
+				};
+				for( const props in studentById ){
+					if(!studentById[props] || !hash[props]) continue;
+					previous[props] = studentById[props];
+				}
+				
+				res.locals.previous = previous;
+			}
+
 			return next();
 		} catch ( error ) {
 			return res.status( 500 ).send( {message: error.message} );
