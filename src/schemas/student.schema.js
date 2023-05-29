@@ -54,3 +54,42 @@ export const studentSchemaUpdate = Joi.object( {
 		.length( 11 )
 		.optional()
 } );
+
+export const studentSchemaSelfUpdate = Joi.object( {
+	name: Joi
+		.string()
+		.min( 3 )
+		.pattern( /^[A-Za-zÀ-ÖØ-öø-ÿ]+(\s+[A-Za-zÀ-ÖØ-öø-ÿ]+){1,}$/ )
+		.message( 'Informe o nome e sobrenome.' )
+		.optional(),
+	email: Joi
+		.string()
+		.min( 5 )
+		.email()
+		.message( 'O campo deve ser em E-mail válido.' )
+		.optional(),
+	photo: Joi
+		.string()
+		.uri( {scheme: ['http', 'https']} )
+		.min( 5 )
+		.message( 'O campo deve ser uma URL válida.' )
+		.optional(),
+	cpf: Joi
+		.string()
+		.length( 11 )
+		.optional()
+} );
+
+export const studentSchemaSelfUpdatePassword = Joi.object( {
+	currentPassword: Joi
+		.string()
+		.required(),
+	newPassword: Joi
+		.string()
+		.required(),
+	confirmNewPassword: Joi
+		.string()
+		.valid( Joi.ref( 'newPassword' ) )
+		.required()
+		.messages( {'any.only': 'Senhas não coincidem'} )
+} );

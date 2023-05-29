@@ -26,7 +26,7 @@ class StudentsRepositories
 
 	getStudentByEmail ( {email} ){
 		const query = {
-			text: 'SELECT * FROM users WHERE email = $1 AND role_id = 1',
+			text: 'SELECT * FROM users WHERE email = $1;',
 			values: [email]
 		};
 
@@ -38,7 +38,8 @@ class StudentsRepositories
 			text: `
 			SELECT 
 			u.id, 
-			u.name, 
+			u.name,
+			u.password, 
 			u.cpf, 
 			u.email, 
 			u.photo, 
@@ -46,7 +47,7 @@ class StudentsRepositories
 			c.id AS "registrationClassId",
 			c.name AS "registrationClass", 
 			(
-				SELECT json_build_object('id', r.id, 'class', cl.name, 'entry_date', r.entry_date, 'egress_date', r.egress_date)
+				SELECT json_build_object('id', r.id, 'classId', cl.id, 'class', cl.name, 'entry_date', r.entry_date, 'egress_date', r.egress_date)
 				FROM registrations r
 				JOIN classes cl ON cl.id = r.class_id
 				WHERE r.id = u.current_registration_id
@@ -94,6 +95,7 @@ class StudentsRepositories
 					classes c ON r.class_id = c.id
 			WHERE
 					1=1
+					AND u.role_id = 1
 			`,
 			values: []
 		};
@@ -139,6 +141,48 @@ class StudentsRepositories
 		query.text+=';';
 
 		return db.query( query );
+	}
+
+	close ( user, student_id ){
+
+		let SET = 'SET';
+		let WHERE = 'WHERE id = ';
+
+		const values = [];
+
+		for( const props in user ){
+			values.push( user[props] );
+			SET += `, ${props} = ${'$' + values.length}`;
+			
+		}
+
+		values.push( student_id );
+		
+		WHERE += `${'$' + values.length}`;
+		const query = {
+			text: `
+			UPDATE users
+				${SET.replace( ',','' )}
+        ${WHERE}
+			  RETURNING *
+			`,
+			values
+		};
+
+		query.text+=';';
+
+		return db.query( query );
+	}
+
+	updatePassowrd (newPassword, studentId){
+		const query = {
+			text: `
+				UPDATE users SET password = $1
+				WHERE id = $2
+			`,
+			values: [newPassword, studentId]
+		};
+		return db.query(query);
 	}
 }
 

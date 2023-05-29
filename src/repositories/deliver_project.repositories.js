@@ -16,7 +16,7 @@ class DeliverProjectRepositories
 		return db.query(query);
 	}
 
-	list ({class_id, project_id}){
+	list ({class_id, project_id, studentId}){
 		const query = {
 			text: `
 			SELECT pd.id AS deliver_id, u.name AS student_name, p.name AS project_name , pd.repository, c.name AS class_name , pd.delivery_date, g.name AS grade
@@ -39,6 +39,11 @@ class DeliverProjectRepositories
 			query.values.push(project_id);
 			query.text+=` AND p.id = $${query.values.length}`;
 		}
+		if(studentId){
+			query.values.push(studentId);
+			query.text+=` AND pd.student_id = $${query.values.length}`;
+		}
+
 		query.text+=`
 			ORDER BY student_name
 			ASC;

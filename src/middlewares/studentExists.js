@@ -57,6 +57,20 @@ export default function studentExist (){
 				res.locals.previous = previous;
 			}
 
+			if(path.includes('/students/signin') && studentByEmail){
+				res.locals.studentByEmail = studentByEmail;
+				return next();
+			}else if(path.includes('/students/signin') && !studentByEmail){
+				return res.status(409).send({message: 'Email Incorreto!'});
+			}
+
+			if(path.includes('/students/update/password/') && studentById){
+				if(res.locals.token !== studentById.id) return res.status(401).send({message: 'Você não pode alterar a senha de outro usuário!'});
+				res.locals.studentById = studentById;
+				return next();
+			}else if(path.includes('/students/update/password/') && !studentById){
+				return res.status(409).send({message: 'Usuário não encontrado!'});
+			}
 			return next();
 		} catch ( error ) {
 			return res.status( 500 ).send( {message: error.message} );

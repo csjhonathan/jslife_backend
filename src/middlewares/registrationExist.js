@@ -14,9 +14,8 @@ export default function registrationExists (){
 
 			if(!reg) return res.status( 409 ).send( {message: 'Matrícula não encontrada'} );
 			if(reg.student_id !== student_id) return res.status( 401 ).send( {message: 'Esta matricula não pertence a este aluno!'} );
-			if(reg.egress_date) return res.status(401).send({message: 'Esta matricula ja foi fechada!'});
+			if(reg.egress_date) return res.status(401).send({message: 'Esta matricula ja foi finalizada!'});
 			
-
 			res.locals.prev = reg;
 			return next();
       

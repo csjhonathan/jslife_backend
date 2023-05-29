@@ -20,3 +20,13 @@ export const updateRegistrationSchema = Joi.object({
 		.date()
 		.required()
 });
+
+export const closeRegistrationSchema = Joi.object({
+	student_id: Joi
+		.number()
+		.greater(0)
+		.required(),
+	egress_date: Joi
+		.date()
+		.required()
+});
